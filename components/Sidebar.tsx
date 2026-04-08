@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
@@ -66,17 +67,11 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#1a2744] text-white flex flex-col z-50">
-      <div className="px-4 py-6 border-b border-white/10 flex flex-col items-center">
-        <svg width="80" height="100" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="100" r="70" stroke="#6b8cba" strokeWidth="5" fill="none"/>
-          <path d="M100 35L65 105L100 90Z" fill="white"/>
-          <path d="M100 90L135 105L100 35Z" fill="#8aadd4"/>
-          <path d="M100 90L65 105L100 165Z" fill="#6b8cba"/>
-          <path d="M100 165L135 105L100 90Z" fill="white" fillOpacity="0.6"/>
-          <text x="100" y="205" textAnchor="middle" fontFamily="sans-serif" fontWeight="700" fontSize="30" letterSpacing="8" fill="white">RIZ</text>
-          <text x="100" y="228" textAnchor="middle" fontFamily="sans-serif" fontWeight="400" fontSize="13" letterSpacing="3" fill="#8aadd4">INTERNATIONAL</text>
-        </svg>
-        <p className="text-xs text-white/50 mt-2">Content Dashboard</p>
+      <div className="flex flex-col items-center py-6 px-4 border-b border-white/10">
+        <div className="bg-white rounded-lg p-3">
+          <Image src="/logo.png" alt="Riz International" width={100} height={100} />
+        </div>
+        <span className="text-sm text-gray-400 mt-2">Content Dashboard</span>
       </div>
 
       <nav className="flex-1 py-4">
