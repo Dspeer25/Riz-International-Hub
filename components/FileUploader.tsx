@@ -45,17 +45,8 @@ function getFileIcon(type: string) {
   );
 }
 
-const initialFiles: UploadedFile[] = [
-  { id: '1', name: 'brand-guidelines.pdf', size: 2400000, type: 'application/pdf', uploaded_at: '2026-04-01T10:00:00Z' },
-  { id: '2', name: 'carousel-template.png', size: 850000, type: 'image/png', uploaded_at: '2026-04-02T09:00:00Z' },
-  { id: '3', name: 'content-calendar-march.pdf', size: 1200000, type: 'application/pdf', uploaded_at: '2026-03-28T14:00:00Z' },
-  { id: '4', name: 'logo-navy.png', size: 45000, type: 'image/png', uploaded_at: '2026-03-25T11:00:00Z' },
-  { id: '5', name: 'reel-script-v2.docx', size: 38000, type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', uploaded_at: '2026-04-03T16:00:00Z' },
-  { id: '6', name: 'engagement-metrics.pdf', size: 980000, type: 'application/pdf', uploaded_at: '2026-04-04T08:00:00Z' },
-];
-
 export default function FileUploader() {
-  const [files, setFiles] = useState<UploadedFile[]>(initialFiles);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -129,41 +120,41 @@ export default function FileUploader() {
       </div>
 
       {/* File grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {files.map((file) => (
-          <div
-            key={file.id}
-            className="bg-[#f8f9fb] rounded-xl border border-gray-100 p-4 hover:shadow-sm transition-shadow"
-          >
-            <div className="text-[#3d5a80] mb-3">
-              {getFileIcon(file.type)}
+      {files.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {files.map((file) => (
+            <div
+              key={file.id}
+              className="bg-[#f8f9fb] rounded-xl border border-gray-100 p-4 hover:shadow-sm transition-shadow"
+            >
+              <div className="text-[#3d5a80] mb-3">
+                {getFileIcon(file.type)}
+              </div>
+              <h4 className="text-sm font-medium text-[#111111] truncate" title={file.name}>
+                {file.name}
+              </h4>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-xs text-[#999999]">{formatFileSize(file.size)}</span>
+                <span className="text-xs text-[#999999]">·</span>
+                <span className="text-xs text-[#999999]">
+                  {new Date(file.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button className="flex-1 py-1.5 text-xs font-medium text-[#3d5a80] bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  Download
+                </button>
+                <button
+                  onClick={() => deleteFile(file.id)}
+                  className="py-1.5 px-3 text-xs font-medium text-red-500 bg-white border border-gray-200 rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <h4 className="text-sm font-medium text-[#111111] truncate" title={file.name}>
-              {file.name}
-            </h4>
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-xs text-[#999999]">{formatFileSize(file.size)}</span>
-              <span className="text-xs text-[#999999]">·</span>
-              <span className="text-xs text-[#999999]">
-                {new Date(file.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </span>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <button className="flex-1 py-1.5 text-xs font-medium text-[#3d5a80] bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                Download
-              </button>
-              <button
-                onClick={() => deleteFile(file.id)}
-                className="py-1.5 px-3 text-xs font-medium text-red-500 bg-white border border-gray-200 rounded-lg hover:bg-red-50 hover:border-red-200 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {files.length === 0 && (
+          ))}
+        </div>
+      ) : (
         <div className="text-center py-12">
           <p className="text-sm text-[#999999]">No files uploaded yet</p>
         </div>

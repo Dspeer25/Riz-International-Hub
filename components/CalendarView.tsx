@@ -36,14 +36,7 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const initialEvents: CalendarEvent[] = [
-  { id: '1', title: 'Risk Management Carousel', date: '2026-04-01', status: 'posted', notes: 'Posted the carousel on risk management tips', instagram_post_id: '1' },
-  { id: '2', title: 'Trading Psychology Reel', date: '2026-04-05', status: 'posted', notes: '3 beginner mistakes reel' },
-  { id: '3', title: 'Market News Recap', date: '2026-04-10', status: 'planned', notes: 'Weekly market recap — cover Fed and jobs data' },
-  { id: '4', title: 'Conscious Capitalism Post', date: '2026-04-14', status: 'in-progress', notes: 'Writing the copy for conscious capitalism carousel' },
-  { id: '5', title: 'Live Q&A Promo', date: '2026-04-18', status: 'planned', notes: 'Promote Friday Q&A session' },
-  { id: '6', title: 'EUR/USD Technical Breakdown', date: '2026-04-22', status: 'planned', notes: 'Full technical analysis video' },
-];
+const initialEvents: CalendarEvent[] = [];
 
 export default function CalendarView() {
   const today = new Date();

@@ -6,74 +6,44 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  status: 'todo' | 'in-progress' | 'done';
+  status: 'ideas' | 'todo' | 'in-progress' | 'done';
+  tags?: string[];
   created_at: string;
   updated_at: string;
 }
 
 const columns: { key: Task['status']; label: string; color: string }[] = [
+  { key: 'ideas', label: 'Ideas', color: 'border-t-purple-500' },
   { key: 'todo', label: 'To Do', color: 'border-t-[#999999]' },
   { key: 'in-progress', label: 'In Progress', color: 'border-t-[#3d5a80]' },
   { key: 'done', label: 'Done', color: 'border-t-green-500' },
 ];
 
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Write copy for EUR/USD breakdown',
-    description: 'Full technical analysis with key levels, entry zones and targets for this week\'s setup.',
-    status: 'todo',
-    created_at: '2026-04-01T10:00:00Z',
-    updated_at: '2026-04-01T10:00:00Z',
-  },
-  {
-    id: '2',
-    title: 'Design conscious capitalism carousel',
-    description: 'Create 8-slide carousel covering the 5 principles. Keep brand colors consistent.',
-    status: 'todo',
-    created_at: '2026-04-02T09:00:00Z',
-    updated_at: '2026-04-02T09:00:00Z',
-  },
-  {
-    id: '3',
-    title: 'Film 3 beginner mistakes reel',
-    description: 'Script ready, need to film and edit. Keep under 60 seconds. Add captions.',
-    status: 'in-progress',
-    created_at: '2026-04-01T08:00:00Z',
-    updated_at: '2026-04-04T14:00:00Z',
-  },
-  {
-    id: '4',
-    title: 'Create Q&A promo graphic',
-    description: 'Design promo image for Friday live Q&A. Include date, time, and topic hints.',
-    status: 'in-progress',
-    created_at: '2026-04-03T11:00:00Z',
-    updated_at: '2026-04-05T09:00:00Z',
-  },
-  {
-    id: '5',
-    title: 'Risk management carousel',
-    description: 'Posted — 12 slides covering position sizing, stop losses, and R:R ratios.',
-    status: 'done',
-    created_at: '2026-03-28T10:00:00Z',
-    updated_at: '2026-04-01T16:00:00Z',
-  },
-  {
-    id: '6',
-    title: 'Monday motivation quote graphic',
-    description: 'Clean minimal design with the portfolio/patience quote. Brand fonts and colors.',
-    status: 'done',
-    created_at: '2026-03-30T09:00:00Z',
-    updated_at: '2026-04-03T08:00:00Z',
-  },
+const AVAILABLE_TAGS = [
+  'market news',
+  'mindset',
+  'ethics',
+  'trading psychology',
+  'conscious capitalism',
+  'sensible approach',
 ];
 
+const tagColors: Record<string, string> = {
+  'market news': 'bg-blue-100 text-blue-700',
+  'mindset': 'bg-purple-100 text-purple-700',
+  'ethics': 'bg-emerald-100 text-emerald-700',
+  'trading psychology': 'bg-orange-100 text-orange-700',
+  'conscious capitalism': 'bg-rose-100 text-rose-700',
+  'sensible approach': 'bg-teal-100 text-teal-700',
+};
+
 export default function KanbanBoard() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [addingTo, setAddingTo] = useState<Task['status'] | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  const [newTags, setNewTags] = useState<string[]>([]);
 
   const moveTask = (taskId: string, newStatus: Task['status']) => {
     setTasks(tasks.map((t) =>
@@ -91,12 +61,14 @@ export default function KanbanBoard() {
       title: newTitle,
       description: newDesc,
       status,
+      tags: newTags.length > 0 ? newTags : undefined,
       created_at: now,
       updated_at: now,
     };
     setTasks([...tasks, task]);
     setNewTitle('');
     setNewDesc('');
+    setNewTags([]);
     setAddingTo(null);
   };
 
@@ -115,9 +87,36 @@ export default function KanbanBoard() {
     setEditingTask(null);
   };
 
+  const toggleNewTag = (tag: string) => {
+    setNewTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const toggleEditTag = (tag: string) => {
+    if (!editingTask) return;
+    const current = editingTask.tags || [];
+    const updated = current.includes(tag)
+      ? current.filter((t) => t !== tag)
+      : [...current, tag];
+    setEditingTask({ ...editingTask, tags: updated });
+  };
+
+  const getNextStatus = (status: Task['status']): Task['status'] | null => {
+    const order: Task['status'][] = ['ideas', 'todo', 'in-progress', 'done'];
+    const idx = order.indexOf(status);
+    return idx < order.length - 1 ? order[idx + 1] : null;
+  };
+
+  const getPrevStatus = (status: Task['status']): Task['status'] | null => {
+    const order: Task['status'][] = ['ideas', 'todo', 'in-progress', 'done'];
+    const idx = order.indexOf(status);
+    return idx > 0 ? order[idx - 1] : null;
+  };
+
   return (
     <div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {columns.map((col) => {
           const colTasks = tasks.filter((t) => t.status === col.key);
           return (
@@ -134,6 +133,7 @@ export default function KanbanBoard() {
                     setAddingTo(col.key);
                     setNewTitle('');
                     setNewDesc('');
+                    setNewTags([]);
                   }}
                   className="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 text-[#666666] transition-colors"
                 >
@@ -144,7 +144,7 @@ export default function KanbanBoard() {
                 </button>
               </div>
 
-              <div className="px-4 pb-4 space-y-3">
+              <div className="px-3 pb-4 space-y-3">
                 {/* Add new card form */}
                 {addingTo === col.key && (
                   <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
@@ -153,7 +153,7 @@ export default function KanbanBoard() {
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       className="w-full text-sm font-medium text-[#111111] border-none outline-none placeholder:text-[#999999] mb-2"
-                      placeholder="Task title"
+                      placeholder="Title"
                       autoFocus
                     />
                     <textarea
@@ -163,6 +163,25 @@ export default function KanbanBoard() {
                       placeholder="Description (optional)"
                       rows={2}
                     />
+                    {/* Tags for Ideas column */}
+                    {col.key === 'ideas' && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {AVAILABLE_TAGS.map((tag) => (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => toggleNewTag(tag)}
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium transition-colors ${
+                              newTags.includes(tag)
+                                ? tagColors[tag]
+                                : 'bg-gray-100 text-[#666666] hover:bg-gray-200'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex gap-2 mt-2">
                       <button
                         onClick={() => addTask(col.key)}
@@ -191,39 +210,56 @@ export default function KanbanBoard() {
                     {task.description && (
                       <p className="text-xs text-[#666666] line-clamp-2 mb-2">{task.description}</p>
                     )}
+                    {task.tags && task.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {task.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tagColors[tag] || 'bg-gray-100 text-gray-600'}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-[#999999]">
                         {new Date(task.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                       <div className="flex gap-1">
-                        {col.key !== 'todo' && (
+                        {getPrevStatus(task.status) && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              const prev = col.key === 'done' ? 'in-progress' : 'todo';
-                              moveTask(task.id, prev as Task['status']);
+                              moveTask(task.id, getPrevStatus(task.status)!);
                             }}
                             className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-[#666666] hover:bg-gray-200 transition-colors"
                           >
-                            ← Move
+                            ←
                           </button>
                         )}
-                        {col.key !== 'done' && (
+                        {getNextStatus(task.status) && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              const next = col.key === 'todo' ? 'in-progress' : 'done';
-                              moveTask(task.id, next as Task['status']);
+                              moveTask(task.id, getNextStatus(task.status)!);
                             }}
                             className="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-[#666666] hover:bg-gray-200 transition-colors"
                           >
-                            Move →
+                            →
                           </button>
                         )}
                       </div>
                     </div>
                   </div>
                 ))}
+
+                {/* Empty state per column */}
+                {colTasks.length === 0 && addingTo !== col.key && (
+                  <div className="py-6 text-center">
+                    <p className="text-xs text-[#999999]">No items</p>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -261,10 +297,30 @@ export default function KanbanBoard() {
                   onChange={(e) => setEditingTask({ ...editingTask, status: e.target.value as Task['status'] })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3d5a80] focus:border-transparent bg-white"
                 >
+                  <option value="ideas">Ideas</option>
                   <option value="todo">To Do</option>
                   <option value="in-progress">In Progress</option>
                   <option value="done">Done</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#111111] mb-1">Tags</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {AVAILABLE_TAGS.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleEditTag(tag)}
+                      className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors ${
+                        (editingTask.tags || []).includes(tag)
+                          ? tagColors[tag]
+                          : 'bg-gray-100 text-[#666666] hover:bg-gray-200'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button
