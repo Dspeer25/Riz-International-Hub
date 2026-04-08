@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
@@ -68,13 +67,14 @@ export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#1a2744] text-white flex flex-col z-50">
       <div className="px-5 py-5 border-b border-white/10 flex items-center gap-3">
-        <Image
-          src="/logo.png"
-          alt="Riz International"
-          width={44}
-          height={44}
-          className="flex-shrink-0"
-        />
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Riz International"
+            className="w-9 h-9 object-contain"
+          />
+        </div>
         <div className="min-w-0">
           <h1 className="text-lg font-bold tracking-tight leading-tight">Riz International</h1>
           <p className="text-xs text-white/60">Content Dashboard</p>
