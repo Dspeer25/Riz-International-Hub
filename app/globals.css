@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-navy: #1a2744;
+  --color-navy-light: #243356;
+  --color-accent: #3d5a80;
+  --color-surface: #f8f9fb;
+  --color-text-primary: #111111;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+}
+
+body {
+  background: #ffffff;
+  color: #111111;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8f9fb;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #999999;
+  border-radius: 3px;
+}
