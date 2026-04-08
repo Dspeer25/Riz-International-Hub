@@ -68,8 +68,8 @@ export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#1a2744] text-white flex flex-col z-50">
       <div className="flex flex-col items-center py-6 px-4 border-b border-white/10">
-        <div className="bg-white rounded-lg p-3">
-          <Image src="/logo.png" alt="Riz International" width={100} height={100} />
+        <div className="bg-white rounded-xl p-4 w-28 h-28 flex items-center justify-center">
+          <Image src="/logo.png" alt="Riz International" width={90} height={90} className="object-contain" />
         </div>
         <span className="text-sm text-gray-400 mt-2">Content Dashboard</span>
       </div>
