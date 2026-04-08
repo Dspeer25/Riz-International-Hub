@@ -1,11 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <!-- Circle -->
-  <circle cx="100" cy="95" r="72" stroke="#3d5a80" stroke-width="5" fill="none"/>
-  <!-- Arrow/compass shape -->
-  <path d="M100 28 L130 95 L100 80 L70 95 Z" fill="#1a2744"/>
-  <path d="M100 80 L130 95 L100 162 L70 95 Z" fill="#3d5a80"/>
-  <!-- RIZ text -->
-  <text x="100" y="200" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="32" letter-spacing="8" fill="#1a2744">RIZ</text>
-  <!-- INTERNATIONAL text -->
-  <text x="100" y="225" text-anchor="middle" font-family="sans-serif" font-weight="400" font-size="14" letter-spacing="4" fill="#3d5a80">INTERNATIONAL</text>
+  <circle cx="50" cy="50" r="44" stroke="#3d5a80" stroke-width="4" fill="none"/>
+  <!-- Upper arrow pointing up-right -->
+  <polygon points="50,12 72,50 50,42" fill="#1a2744"/>
+  <!-- Lower arrow pointing down-left -->
+  <polygon points="50,42 72,50 50,88 28,50" fill="#3d5a80"/>
+  <polygon points="50,42 28,50 50,12" fill="#a8c0d8"/>
 </svg>
