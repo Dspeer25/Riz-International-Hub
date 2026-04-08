@@ -69,7 +69,7 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#1a2744] text-white flex flex-col z-50">
       <div className="px-5 py-5 border-b border-white/10 flex items-center gap-3">
         <Image
-          src="/logo.svg"
+          src="/logo.png"
           alt="Riz International"
           width={44}
           height={44}
