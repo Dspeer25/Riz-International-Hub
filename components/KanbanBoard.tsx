@@ -1,16 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'ideas' | 'todo' | 'in-progress' | 'done';
-  tags?: string[];
-  created_at: string;
-  updated_at: string;
-}
+import { useState, useEffect } from 'react';
+import { loadTasks, saveTask as persistTask, deleteTask as removeTask, type Task } from '@/lib/storage';
 
 const columns: { key: Task['status']; label: string; color: string }[] = [
   { key: 'ideas', label: 'Ideas', color: 'border-t-purple-500' },
@@ -45,19 +36,26 @@ export default function KanbanBoard() {
   const [newDesc, setNewDesc] = useState('');
   const [newTags, setNewTags] = useState<string[]>([]);
 
+  useEffect(() => {
+    loadTasks().then(setTasks);
+  }, []);
+
   const moveTask = (taskId: string, newStatus: Task['status']) => {
-    setTasks(tasks.map((t) =>
+    const updated = tasks.map((t) =>
       t.id === taskId
         ? { ...t, status: newStatus, updated_at: new Date().toISOString() }
         : t
-    ));
+    );
+    setTasks(updated);
+    const task = updated.find(t => t.id === taskId);
+    if (task) persistTask(task);
   };
 
-  const addTask = (status: Task['status']) => {
+  const addTask = async (status: Task['status']) => {
     if (!newTitle.trim()) return;
     const now = new Date().toISOString();
     const task: Task = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: newTitle,
       description: newDesc,
       status,
@@ -70,21 +68,21 @@ export default function KanbanBoard() {
     setNewDesc('');
     setNewTags([]);
     setAddingTo(null);
+    await persistTask(task);
   };
 
-  const updateTask = () => {
+  const updateTask = async () => {
     if (!editingTask) return;
-    setTasks(tasks.map((t) =>
-      t.id === editingTask.id
-        ? { ...editingTask, updated_at: new Date().toISOString() }
-        : t
-    ));
+    const updated = { ...editingTask, updated_at: new Date().toISOString() };
+    setTasks(tasks.map((t) => t.id === updated.id ? updated : t));
     setEditingTask(null);
+    await persistTask(updated);
   };
 
-  const deleteTask = (id: string) => {
+  const deleteTask = async (id: string) => {
     setTasks(tasks.filter((t) => t.id !== id));
     setEditingTask(null);
+    await removeTask(id);
   };
 
   const toggleNewTag = (tag: string) => {

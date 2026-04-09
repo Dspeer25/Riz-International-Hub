@@ -1,15 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  date: string;
-  status: 'planned' | 'in-progress' | 'posted';
-  notes: string;
-  instagram_post_id?: string;
-}
+import { useState, useEffect } from 'react';
+import { loadCalendarEvents, saveCalendarEvent, type CalendarEvent } from '@/lib/storage';
 
 const statusColors: Record<string, string> = {
   posted: 'bg-[#1a2744] text-white',
@@ -36,13 +28,15 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const initialEvents: CalendarEvent[] = [];
-
 export default function CalendarView() {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
-  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+
+  useEffect(() => {
+    loadCalendarEvents().then(setEvents);
+  }, []);
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const [formTitle, setFormTitle] = useState('');
@@ -79,11 +73,11 @@ export default function CalendarView() {
     setShowForm(true);
   };
 
-  const handleAddEvent = (e: React.FormEvent) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim()) return;
     const newEvent: CalendarEvent = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: formTitle,
       date: selectedDate,
       status: formStatus,
@@ -91,6 +85,7 @@ export default function CalendarView() {
     };
     setEvents([...events, newEvent]);
     setShowForm(false);
+    await saveCalendarEvent(newEvent);
   };
 
   const getEventsForDay = (day: number) => {

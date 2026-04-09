@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { loadSubcategories, saveSubcategory, type Subcategory } from '@/lib/storage';
 
 type Category = 'current' | 'experimental' | 'testing';
 type TimeRange = '1d' | '7d' | '14d' | '30d' | '90d' | 'YTD';
@@ -116,6 +117,23 @@ export default function AnalysisDashboard() {
   const [sortKey, setSortKey] = useState<SortKey>('timestamp');
   const [sortAsc, setSortAsc] = useState(false);
 
+  useEffect(() => {
+    loadSubcategories().then((subs: Subcategory[]) => {
+      setExperimentalSubs(subs.filter(s => s.category === 'experimental').map(s => s.name));
+      setTestingSubs(subs.filter(s => s.category === 'testing').map(s => s.name));
+    });
+  }, []);
+
+  const createExpSub = async (name: string) => {
+    setExperimentalSubs([...experimentalSubs, name]);
+    await saveSubcategory({ id: crypto.randomUUID(), category: 'experimental', name });
+  };
+
+  const createTestSub = async (name: string) => {
+    setTestingSubs([...testingSubs, name]);
+    await saveSubcategory({ id: crypto.randomUUID(), category: 'testing', name });
+  };
+
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
     else { setSortKey(key); setSortAsc(false); }
@@ -203,7 +221,7 @@ export default function AnalysisDashboard() {
               subcategories={experimentalSubs}
               selected={selectedExpSub}
               onSelect={setSelectedExpSub}
-              onCreate={(val) => setExperimentalSubs([...experimentalSubs, val])}
+              onCreate={createExpSub}
             />
             <div className="space-y-3 mt-4">
               <div className="flex justify-between"><span className="text-sm text-[#666666]">Posts</span><span className="text-sm font-semibold text-[#999999]">—</span></div>
@@ -224,7 +242,7 @@ export default function AnalysisDashboard() {
               subcategories={testingSubs}
               selected={selectedTestSub}
               onSelect={setSelectedTestSub}
-              onCreate={(val) => setTestingSubs([...testingSubs, val])}
+              onCreate={createTestSub}
             />
             <div className="space-y-3 mt-4">
               <div className="flex justify-between"><span className="text-sm text-[#666666]">Posts</span><span className="text-sm font-semibold text-[#999999]">—</span></div>
