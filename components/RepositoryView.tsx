@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
 interface RepoFile {
   id: string;
@@ -31,22 +31,42 @@ function formatFileSize(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-function getFileIcon(type: string) {
+function getFileIcon(type: string, size: number = 18) {
   if (type.startsWith('image/')) return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
     </svg>
   );
   if (type === 'application/pdf') return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" />
     </svg>
   );
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" />
     </svg>
   );
+}
+
+function isImageType(type: string) {
+  return /^image\/(jpeg|jpg|png|gif|webp|svg)/.test(type);
+}
+
+function useHoverDelay(delay: number = 1000) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onEnter = useCallback((id: string) => {
+    timerRef.current = setTimeout(() => setHoveredId(id), delay);
+  }, [delay]);
+
+  const onLeave = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setHoveredId(null);
+  }, []);
+
+  return { hoveredId, onEnter, onLeave };
 }
 
 export default function RepositoryView() {
@@ -58,6 +78,8 @@ export default function RepositoryView() {
   const [newFolderName, setNewFolderName] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderHover = useHoverDelay(1000);
+  const fileHover = useHoverDelay(1000);
 
   const folders = data[selectedMonth] || [];
   const openFolder = openFolderId ? folders.find(f => f.id === openFolderId) : null;
@@ -231,6 +253,8 @@ export default function RepositoryView() {
                   key={folder.id}
                   className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer group relative"
                   onClick={() => setOpenFolderId(folder.id)}
+                  onMouseEnter={() => folderHover.onEnter(folder.id)}
+                  onMouseLeave={folderHover.onLeave}
                 >
                   <div className="text-[#3d5a80] mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -248,6 +272,33 @@ export default function RepositoryView() {
                       <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                     </svg>
                   </button>
+
+                  {/* Folder Hover Preview */}
+                  {folderHover.hoveredId === folder.id && (
+                    <div
+                      className="absolute left-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-20 min-w-[220px]"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {folder.files.length === 0 ? (
+                        <p className="text-xs text-[#999999] italic">Empty folder</p>
+                      ) : (
+                        <>
+                          {folder.files.slice(0, 5).map((file) => (
+                            <div key={file.id} className="flex items-center gap-2 py-1.5">
+                              <div className="text-[#3d5a80] flex-shrink-0">{getFileIcon(file.type, 14)}</div>
+                              <span className="text-xs text-[#111111] truncate flex-1">{file.name}</span>
+                              <span className="text-[10px] text-[#999999] flex-shrink-0">{formatFileSize(file.size)}</span>
+                            </div>
+                          ))}
+                          {folder.files.length > 5 && (
+                            <p className="text-[10px] text-[#999999] pt-1.5 border-t border-gray-100 mt-1">
+                              and {folder.files.length - 5} more file{folder.files.length - 5 !== 1 ? 's' : ''}...
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -294,9 +345,11 @@ export default function RepositoryView() {
               {openFolder.files.map((file, i) => (
                 <div
                   key={file.id}
-                  className={`flex items-center gap-3 px-4 py-3 hover:bg-[#f8f9fb] transition-colors ${
+                  className={`flex items-center gap-3 px-4 py-3 hover:bg-[#f8f9fb] transition-colors relative ${
                     i < openFolder.files.length - 1 ? 'border-b border-gray-50' : ''
                   }`}
+                  onMouseEnter={() => fileHover.onEnter(file.id)}
+                  onMouseLeave={fileHover.onLeave}
                 >
                   <div className="text-[#3d5a80] flex-shrink-0">{getFileIcon(file.type)}</div>
                   <div className="flex-1 min-w-0">
@@ -323,6 +376,31 @@ export default function RepositoryView() {
                       <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                     </svg>
                   </button>
+
+                  {/* File Hover Preview */}
+                  {fileHover.hoveredId === file.id && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-3 z-20">
+                      {isImageType(file.type) ? (
+                        <div>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={file.dataUrl}
+                            alt={file.name}
+                            className="max-w-[300px] max-h-[300px] rounded-lg object-contain"
+                          />
+                          <p className="text-[10px] text-[#999999] mt-2 text-center">{file.name}</p>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 min-w-[200px]">
+                          <div className="text-[#3d5a80]">{getFileIcon(file.type, 32)}</div>
+                          <div>
+                            <p className="text-sm font-medium text-[#111111]">{file.name}</p>
+                            <p className="text-xs text-[#999999]">{formatFileSize(file.size)}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
