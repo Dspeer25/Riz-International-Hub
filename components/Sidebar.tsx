@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
-const navItems = [
+const navItems: { label: string; subtitle?: string; href: string; icon: React.ReactNode }[] = [
   {
     label: 'Media',
     href: '/media',
@@ -60,6 +60,16 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: 'Repository',
+    subtitle: '(OneDrive alternative?)',
+    href: '/repository',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {
@@ -88,7 +98,12 @@ export default function Sidebar() {
               }`}
             >
               {item.icon}
-              {item.label}
+              <div>
+                <span>{item.label}</span>
+                {item.subtitle && (
+                  <span className="block text-[10px] italic text-white/40 font-normal leading-tight">{item.subtitle}</span>
+                )}
+              </div>
             </Link>
           );
         })}
