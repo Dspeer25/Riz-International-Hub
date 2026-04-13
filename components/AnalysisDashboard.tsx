@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   loadSubcategories, saveSubcategory,
   loadRepoFolders, loadAllRepoFiles,
-  loadCalendarEvents,
-  type Subcategory, type RepoFolder, type RepoFile, type CalendarEvent,
+  type Subcategory, type RepoFolder, type RepoFile,
 } from '@/lib/storage';
 
 type Category = 'current' | 'experimental' | 'testing';
@@ -129,7 +128,6 @@ export default function AnalysisDashboard() {
   const [folders, setFolders] = useState<RepoFolder[]>([]);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<RepoFolder | null>(null);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
     loadSubcategories().then((subs: Subcategory[]) => {
@@ -138,7 +136,6 @@ export default function AnalysisDashboard() {
     });
     loadRepoFolders().then(setFolders);
     loadAllRepoFiles().then(setFiles);
-    loadCalendarEvents().then(setEvents);
   }, []);
 
   // Build posts from repository folders — each folder is a post
@@ -155,24 +152,6 @@ export default function AnalysisDashboard() {
     };
   }).sort((a, b) => (b.folder.created_at || '').localeCompare(a.folder.created_at || ''));
 
-  // Build week view for calendar mini-view
-  const today = new Date();
-  const weekDays: { date: Date; label: string; day: string; events: CalendarEvent[] }[] = [];
-  const dayOfWeek = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    weekDays.push({
-      date: d,
-      label: dayLabels[i],
-      day: String(d.getDate()),
-      events: events.filter(e => e.date === dateStr),
-    });
-  }
 
   const createExpSub = async (name: string) => {
     setExperimentalSubs([...experimentalSubs, name]);
@@ -435,44 +414,50 @@ export default function AnalysisDashboard() {
         </div>
       )}
 
-      {/* Content Calendar Mini-View */}
+      {/* Posts by Image */}
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-[#111111] mb-4">Content Calendar (This Week)</h2>
+        <h2 className="text-lg font-semibold text-[#111111] mb-4">Posts by Image</h2>
       </div>
       <div className="bg-white border border-gray-100 rounded-xl p-5">
-        <div className="grid grid-cols-7 gap-2">
-          {weekDays.map((wd, i) => {
-            const isToday = wd.date.toDateString() === today.toDateString();
-            const hasPosted = wd.events.some(e => e.status === 'posted');
-            const hasPlanned = wd.events.some(e => e.status === 'planned' || e.status === 'in-progress');
-            return (
-              <div key={i} className="flex flex-col items-center">
-                <p className="text-[10px] text-[#999999] uppercase tracking-wider font-medium">{wd.label}</p>
-                <div className={`mt-1.5 w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  isToday ? 'bg-[#1a2744] text-white' : 'text-[#666666]'
-                }`}>
-                  {wd.day}
-                </div>
-                <div className="flex gap-1 mt-2 h-1.5">
-                  {hasPosted && <span className="w-1.5 h-1.5 rounded-full bg-[#1a2744]" title="Posted" />}
-                  {hasPlanned && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" title="Planned" />}
-                  {!hasPosted && !hasPlanned && <span className="w-1.5 h-1.5 rounded-full bg-gray-200" />}
-                </div>
-                <p className="text-[10px] text-[#999999] mt-1">
-                  {wd.events.length > 0 ? `${wd.events.length} post${wd.events.length !== 1 ? 's' : ''}` : '—'}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex gap-4 mt-4 pt-3 border-t border-gray-50">
-          <div className="flex items-center gap-1.5 text-[10px] text-[#666666]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1a2744]" /> Posted
+        {posts.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm font-medium text-[#666666]">No posts yet.</p>
+            <p className="text-xs text-[#999999] mt-1">Upload post images in the Repository tab to see them here.</p>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-[#666666]">
-            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" /> Planned / In Progress
+        ) : (
+          <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+            {posts.map((post) => (
+              <button
+                key={post.folder.id}
+                onClick={() => setSelectedFolder(post.folder)}
+                className="aspect-square bg-gray-200 rounded-lg overflow-hidden hover:opacity-80 transition-opacity relative group"
+                title={post.folder.name}
+              >
+                {post.thumbnail ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={post.thumbnail.url || post.thumbnail.dataUrl || ''}
+                    alt={post.folder.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[#999999]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                    </svg>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end p-2">
+                  <p className="text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity line-clamp-2 font-medium">
+                    {post.folder.name}
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Post Detail Modal */}

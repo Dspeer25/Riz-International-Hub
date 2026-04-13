@@ -123,63 +123,23 @@ export default function InstagramConnect({ hasAppId, connected, igUserId, tokenP
           </div>
         )}
 
-        {/* Connect button — only works if Facebook App is configured */}
-        {hasAppId ? (
-          <div>
-            <a
-              href="/api/instagram/auth"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-              </svg>
-              Connect Instagram Account
-            </a>
-            <p className="text-xs text-[#999999] mt-3">
-              You&apos;ll be redirected to Facebook to authorize access.
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 text-left mb-4">
-              <h3 className="text-sm font-semibold text-[#111111] mb-3">Setup Required (Dylan)</h3>
-              <p className="text-sm text-[#666666] mb-3">
-                A Meta Developer App needs to be created first. This is a one-time setup.
-              </p>
-              <ol className="space-y-2.5 text-sm text-[#666666]">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1a2744] text-white text-xs flex items-center justify-center font-medium">1</span>
-                  <span>Go to <strong className="text-[#111111]">developers.facebook.com</strong> and create an app (type: Business)</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1a2744] text-white text-xs flex items-center justify-center font-medium">2</span>
-                  <span>Add <strong className="text-[#111111]">Facebook Login</strong> and <strong className="text-[#111111]">Instagram Graph API</strong> products</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1a2744] text-white text-xs flex items-center justify-center font-medium">3</span>
-                  <span>In Facebook Login settings, add your Vercel URL + <code className="bg-[#f8f9fb] px-1 rounded text-xs font-mono">/api/instagram/callback</code> as a Valid OAuth Redirect URI</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#1a2744] text-white text-xs flex items-center justify-center font-medium">4</span>
-                  <span>Add these env vars in <strong className="text-[#111111]">Vercel → Settings → Environment Variables</strong>:</span>
-                </li>
-              </ol>
-              <div className="mt-3 space-y-1.5 pl-9">
-                <div className="flex items-center gap-2">
-                  <code className="text-xs bg-[#f8f9fb] px-2 py-1 rounded font-mono text-[#3d5a80]">FACEBOOK_APP_ID</code>
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="text-xs bg-[#f8f9fb] px-2 py-1 rounded font-mono text-[#3d5a80]">FACEBOOK_APP_SECRET</code>
-                </div>
-              </div>
-              <p className="text-xs text-[#999999] mt-3 pl-9">
-                After adding these and redeploying, a &quot;Connect Instagram&quot; button will appear here.
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Connect button */}
+        <div>
+          <a
+            href="/api/instagram/auth"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+            </svg>
+            Connect Instagram Account
+          </a>
+          <p className="text-xs text-[#999999] mt-3">
+            You&apos;ll be redirected to Facebook to authorize access.
+          </p>
+        </div>
       </div>
     </div>
   );
